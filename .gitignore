@@ -7,5 +7,9 @@ build
 #Ignore bash config file
 .sdkmanrc
 
-#Ignore
+#Ignore build files
 app/build
+app/bin
+
+#Ignore IDE config
+.vscode
