@@ -3,7 +3,35 @@
  */
 package en.talond.fileScrapingSocket
 
+import java.io.File;
+
+
+
+
+
 fun main() {
-    println("Hello")
+    val server = TextServer(51842,LogTransmissionProtocol())
+    val serverInstance = Thread(server)
+    serverInstance.start()
 }
 
+
+
+
+
+
+//
+private class LogTransmissionProtocol() : TextualProtocol {
+    override val entryCode = "1asfg34r23rfwdfg"
+    override val exitCode = "44ttgqrdsfreg4t"
+    override fun interpret(request : String) : String {
+        if(request.contentEquals(expectedRequest))
+            return scrapeLogData();
+        else return badRequestResponse;
+    }
+    private val expectedRequest = "brtgregre4teg"
+    private val badRequestResponse = "INVALID REQUEST"
+    private fun scrapeLogData() : String {
+        return "you didnt import the code yet"
+    }
+}
