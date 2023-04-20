@@ -18,19 +18,37 @@ class Test {
     @Test fun canHoldAConversation() {
         val server = TextServer(15325, TestProtocol())
         val client = TestClient("localhost",15325)
+        openTwoThreads(server,client)
+        val responses = client.responses!!
+        println(responses)
+        var allMatching = responses[0].contentEquals(protocol.entryCode) &&
+                responses[1].contentEquals(protocol.response) &&
+                responses[2].contentEquals(protocol.exitCode);
+        assert(allMatching)
+    }
+
+
+    @Test fun canRejectBadCaller() {
+        val server = TextServer(4280,TestProtocol())
+        val client = BadTestClient("localhost",4280)
+        openTwoThreads(server,client)
+        val response = client.response
+        assert(response.contentEquals("AUTHENTICATION FAILED!"))
+    }
+
+
+
+    private fun openTwoThreads(server : Runnable, client : Runnable) {
         val serverInstance = Thread(server)
         val clientInstance = Thread(client)
         serverInstance.start()
         Thread.sleep(1_000L)
         clientInstance.start()
         Thread.sleep(1_000L)
-        val responses = client.responses!!
-        var allMatching = responses[0].contentEquals(protocol.entryCode) &&
-                responses[1].contentEquals(protocol.response) &&
-                responses[2].contentEquals(protocol.exitCode);
-                assert(allMatching)
     }
 }
+
+
 
 
 
@@ -50,8 +68,9 @@ class TestProtocol : TextualProtocol {
 class TestClient (host : String, port : Int) : Runnable {
     val host = host
     val port = port
-    @Volatile var responses : List<String>? = null
     val protocol = TestProtocol()
+    @Volatile var responses : List<String>? = null;
+
     public override fun run() {
         val socket = Socket(host,port)
         val writer = PrintWriter(socket.getOutputStream(),true)
@@ -63,9 +82,25 @@ class TestClient (host : String, port : Int) : Runnable {
         writer.println(protocol.exitCode)
         var response2 = reader.readLine()
         responses = listOf(response0,response1,response2)
-        println(responses)
         socket.close()
         writer.close()
         reader.close()
+    }
+}
+
+
+class BadTestClient(host : String, port : Int) : Runnable {
+    val host = host
+    val port = port
+    val protocol = TestProtocol()
+    @Volatile var response = ""
+
+    public override fun run() {
+        val socket = Socket(host,port)
+        val writer = PrintWriter(socket.getOutputStream(),true)
+        val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
+        writer.println("This isnt the code!")
+        response = reader.readLine()
+        socket.close();
     }
 }

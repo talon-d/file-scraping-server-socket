@@ -11,7 +11,7 @@ import java.io.PrintWriter
 
 
 public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
-    val port = port
+    public val port = port
     private val interpreter = interpreter
     public override fun run() {
         val server = ServerSocket(port)
@@ -25,6 +25,7 @@ public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
         if(request.contentEquals(interpreter.entryCode)) {
             println("Client accepted! Communicating...")
             writer.println(interpreter.entryCode)
+            request = reader.readLine()
             while(!request.contentEquals(interpreter.exitCode)) {
                 val response = interpreter.interpret(request)
                 writer.println(response)
