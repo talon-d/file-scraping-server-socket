@@ -8,8 +8,6 @@ import java.io.PrintWriter
 
 
 
-
-
 public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
     public val port = port
     private val interpreter = interpreter
@@ -22,11 +20,11 @@ public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
         val reader = BufferedReader(InputStreamReader(client.getInputStream()))
         val writer = PrintWriter(client.getOutputStream(),true)
         var request = reader.readLine()
-        if(request.contentEquals(interpreter.entryCode)) {
+        if(request.equals(interpreter.entryCode)) {
             println("Client accepted! Communicating...")
             writer.println(interpreter.entryCode)
             request = reader.readLine()
-            while(!request.contentEquals(interpreter.exitCode)) {
+            while(!request.equals(interpreter.exitCode)) {
                 val response = interpreter.interpret(request)
                 writer.println(response)
                 request = reader.readLine()
