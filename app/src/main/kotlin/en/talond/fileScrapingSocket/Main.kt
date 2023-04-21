@@ -17,18 +17,13 @@ fun main(args : Array<String>) {
     val falsify = args.contains("fake")
     if(falsify) {
         val server1 = TextServer(51842,FakeLogProtocol(48,3_000L))
-        val server2 = TextServer(51842,FakeLogProtocol(56,5_000L))
+        val server2 = TextServer(51843,FakeLogProtocol(56,5_000L))
         Thread(server1).start()
         Thread(server2).start()
     } else {
         val server = TextServer(51842,LogTransmissionProtocol(targetDir))
         Thread(server).start()
     }
-    val reader = Scanner(System.`in`)
-    do {
-        print("Enter 'quit' to exit: ")
-        val input = reader.nextLine();
-    } while (input != null && !input.contentEquals("quit"))
 }
 
 
