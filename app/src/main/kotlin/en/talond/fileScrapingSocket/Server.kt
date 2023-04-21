@@ -6,12 +6,13 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
 
-
+val eol = if(System.getProperty("os.name").contains("Windows")) "\n\r"; else "\n";
 
 public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
     public val port = port
     private val interpreter = interpreter
     public override fun run() {
+        /*DELETE*/ println(System.getProperty("os.name"))
         val server = ServerSocket(port)
         var client : Socket
         println("$server is waiting for client...")
@@ -22,18 +23,22 @@ public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
         var request = reader.readLine()
         if(request.equals(interpreter.entryCode)) {
             println("Client accepted! Communicating...")
-            writer.println(interpreter.entryCode)
+            writer.write(interpreter.entryCode+eol)
+            writer.flush()
             request = reader.readLine()
             while(!request.equals(interpreter.exitCode)) {
                 val response = interpreter.interpret(request)
-                writer.println(response)
+                writer.write(response+eol)
+                writer.flush()
                 request = reader.readLine()
             }
-            writer.println(interpreter.exitCode)
+            writer.write(interpreter.exitCode+eol)
+            writer.flush()
             println("Connection with $client ended!")
         } else {
             println("Client rejected!")
-            writer.println("AUTHENTICATION FAILED!")
+            writer.write("AUTHENTICATION FAILED!"+eol)
+            writer.flush()
         }
         client.close()
         reader.close()

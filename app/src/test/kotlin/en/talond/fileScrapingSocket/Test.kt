@@ -10,9 +10,10 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
 
-
 val protocol = TestProtocol()
 
+
+val eol = if(System.getProperty("os.name").contains("Windows")) "\n\r"; else "\n";
 
 class Test {
     @Test fun canHoldAConversation() {
@@ -33,7 +34,7 @@ class Test {
         val client = BadTestClient("localhost",4280)
         openTwoThreads(server,client)
         val response = client.response
-        assert(response.contentEquals("AUTHENTICATION FAILED!"))
+        assert(response.equals("AUTHENTICATION FAILED!"))
     }
 
 
@@ -73,13 +74,16 @@ class TestClient (host : String, port : Int) : Runnable {
 
     public override fun run() {
         val socket = Socket(host,port)
-        val writer = PrintWriter(socket.getOutputStream(),true)
+        val writer = PrintWriter(socket.getOutputStream(),false)
         val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-        writer.println(protocol.entryCode)
+        writer.write(protocol.entryCode+eol)
+        writer.flush()
         var response0 = reader.readLine()
-        writer.println("")
+        writer.write(""+eol)
+        writer.flush()
         var response1 = reader.readLine()
-        writer.println(protocol.exitCode)
+        writer.write(protocol.exitCode+eol)
+        writer.flush()
         var response2 = reader.readLine()
         responses = listOf(response0,response1,response2)
         socket.close()
@@ -97,9 +101,10 @@ class BadTestClient(host : String, port : Int) : Runnable {
 
     public override fun run() {
         val socket = Socket(host,port)
-        val writer = PrintWriter(socket.getOutputStream(),true)
+        val writer = PrintWriter(socket.getOutputStream(),false)
         val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-        writer.println("This isnt the code!")
+        writer.write("This isnt the code!"+eol)
+        writer.flush()
         response = reader.readLine()
         socket.close();
     }
