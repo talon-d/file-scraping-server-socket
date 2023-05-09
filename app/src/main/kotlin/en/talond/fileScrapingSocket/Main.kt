@@ -114,14 +114,17 @@ private class FakeLogProtocol(maxStep : Int, stepTime : Long) : TextualProtocol 
         init { startTime = System.currentTimeMillis(); }
 
         fun getSimulatedLine() : String {
-            val step = wrapCurrentStep(System.currentTimeMillis());
-            return getRandomizedString()+" "+step;
+            val isStepUpdate =  randomizer.nextBoolean()
+            if(isStepUpdate) {
+                val step = wrapCurrentStep(System.currentTimeMillis());
+                return getRandomizedString()+" "+step;
+            } else return getRandomizedString();
         }
 
         private fun wrapCurrentStep(current : Long) : Int {
-            val elapsed = current - startTime
+            val elapsed= current - startTime
             val stepsElapsed = elapsed / stepTime
-            val cyclesCompleted = stepsElapsed % maxStep
+            val cyclesCompleted = Math.floor(stepsElapsed.toDouble() / maxStep.toDouble()).toLong()
             return (stepsElapsed - cyclesCompleted*maxStep).toInt();
         }
 

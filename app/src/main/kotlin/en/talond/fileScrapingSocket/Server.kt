@@ -6,13 +6,12 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
 
-val eol = if(System.getProperty("os.name").contains("Windows")) "\n\r"; else "\n";
+val eol = if(System.getProperty("os.name").contains("Windows")) "\r\n"; else "\n";
 
 public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
     public val port = port
     private val interpreter = interpreter
     public override fun run() {
-        /*DELETE*/ println(System.getProperty("os.name"))
         val server = ServerSocket(port)
         var client : Socket
         println("$server is waiting for client...")
@@ -30,6 +29,7 @@ public class TextServer(port : Int, interpreter : TextualProtocol) : Runnable {
                 val response = interpreter.interpret(request)
                 writer.write(response+eol)
                 writer.flush()
+                println("$request\t->\t$response")
                 request = reader.readLine()
             }
             writer.write(interpreter.exitCode+eol)
