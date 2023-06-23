@@ -16,8 +16,8 @@ val targetDir = File(System.getProperty("user.home")+"/Desktop/SembaPro Logs")
 fun main(args : Array<String>) {
     val falsify = args.contains("fake")
     if(falsify) {
-        val server1 = TextServer(51842,FakeLogProtocol(48,3_000L))
-        val server2 = TextServer(51843,FakeLogProtocol(56,5_000L))
+        val server1 = TextServer(51842,FakeLogProtocol(48))
+        val server2 = TextServer(51843,FakeLogProtocol(56));
         Thread(server1).start()
         Thread(server2).start()
     } else {
@@ -83,8 +83,8 @@ private class LogTransmissionProtocol(targetDir : File) : TextualProtocol {
  * without requiring the real-world equipment to be set up and
  * running.
  */
-private class FakeLogProtocol(maxStep : Int, stepTime : Long) : TextualProtocol {
-    private val system = Machine(maxStep,stepTime)
+private class FakeLogProtocol(maxStep : Int) : TextualProtocol {
+    private val system = Machine(maxStep)
     override val entryCode : String
     override val exitCode : String
     val requestCode : String
@@ -106,26 +106,18 @@ private class FakeLogProtocol(maxStep : Int, stepTime : Long) : TextualProtocol 
     /**
      * Simulated equipment object
      */
-    private class Machine(maxStep : Int, stepTime : Long) {
+    private class Machine(maxStep : Int) {
         val maxStep = maxStep
-        val stepTime = stepTime
         val randomizer = Random()
-        val startTime : Long
-        init { startTime = System.currentTimeMillis(); }
-
+        var step = 0
         fun getSimulatedLine() : String {
             val isStepUpdate =  randomizer.nextBoolean()
             if(isStepUpdate) {
-                val step = wrapCurrentStep(System.currentTimeMillis());
+                step++;
+                if(step >= maxStep)
+                    step = 0;
                 return getRandomizedString()+" "+step;
             } else return getRandomizedString();
-        }
-
-        private fun wrapCurrentStep(current : Long) : Int {
-            val elapsed= current - startTime
-            val stepsElapsed = elapsed / stepTime
-            val cyclesCompleted = Math.floor(stepsElapsed.toDouble() / maxStep.toDouble()).toLong()
-            return (stepsElapsed - cyclesCompleted*maxStep).toInt();
         }
 
         
